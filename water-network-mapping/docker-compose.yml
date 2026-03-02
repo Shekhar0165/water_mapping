@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: water_network_api
+    restart: always
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./backend/.env
+    # Override the local host definitions with docker service names
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: water_network_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 6012
+      POSTGRES_DB: water_network_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: water_network_redis
+    # Port is not exposed to host to avoid "port is already allocated" errors. 
+    # The 'api' container can still connect to it on port 6379 internally.
+    restart: always
+
+volumes:
+  pgdata:

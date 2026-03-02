@@ -1,0 +1,4 @@
+src/complaints/complaints.service.ts(25,27): error TS2339: Property 'reporter' does not exist on type 'Complaint[]'.
+src/complaints/complaints.service.ts(32,27): error TS2339: Property 'nearest_pipe' does not exist on type 'Complaint[]'.
+src/complaints/complaints.service.ts(36,9): error TS2740: Type 'Complaint[]' is missing the following properties from type 'Complaint': id, reporter, type, status, and 8 more.
+src/maps/maps.service.ts(39,9): error TS2740: Type 'NetworkPipe[]' is missing the following properties from type 'NetworkPipe': id, material, diameter_mm, status, and 5 more.
