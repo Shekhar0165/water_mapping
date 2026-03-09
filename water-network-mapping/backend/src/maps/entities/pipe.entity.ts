@@ -11,6 +11,7 @@ export enum PipeStatus {
     ACTIVE = 'Active',
     LEAKING = 'Leaking',
     CLOSED = 'Closed',
+    MAINTENANCE = 'Maintenance',
 }
 
 @Entity('network_pipes')
@@ -33,6 +34,15 @@ export class NetworkPipe {
         default: PipeStatus.ACTIVE,
     })
     status: PipeStatus;
+
+    @Column({ type: 'varchar', nullable: true })
+    cityId: string | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    maintenance_start_time: Date | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    maintenance_end_time: Date | null;
 
     @ManyToOne(() => NetworkNode)
     @JoinColumn({ name: 'start_node_id' })

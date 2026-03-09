@@ -6,6 +6,7 @@ interface User {
     userId: string;
     email: string;
     role: string;
+    cityId: string | null;
 }
 
 interface AuthState {
@@ -35,7 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
                 if (!isExpired) {
                     set({
                         token,
-                        user: { userId: decoded.sub, email: decoded.email, role: decoded.role },
+                        user: { userId: decoded.sub, email: decoded.email, role: decoded.role, cityId: decoded.cityId || null },
                         isAuthenticated: true,
                         isLoading: false
                     });
@@ -63,7 +64,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             const decoded: any = jwtDecode(accessToken);
             set({
                 token: accessToken,
-                user: { userId: decoded.sub, email: decoded.email, role: decoded.role },
+                user: { userId: decoded.sub, email: decoded.email, role: decoded.role, cityId: decoded.cityId || null },
                 isAuthenticated: true
             });
         } catch (error) {

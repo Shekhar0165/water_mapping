@@ -35,6 +35,9 @@ export class NetworkNode {
     })
     status: NodeStatus;
 
+    @Column({ type: 'varchar', nullable: true })
+    cityId: string | null;
+
     @Column({
         type: 'geometry',
         spatialFeatureType: 'Point',

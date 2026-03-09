@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '../lib/api';
 import {
     Table,
@@ -10,25 +10,28 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import ComplaintDetailModal from './ComplaintDetailModal';
 
 export default function ComplaintsTable() {
     const [complaints, setComplaints] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+    const fetchComplaints = useCallback(async () => {
+        try {
+            const res = await api.get('/complaints');
+            setComplaints(res.data);
+        } catch (error) {
+            console.error("Failed to fetch complaints", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchComplaints = async () => {
-            try {
-                const res = await api.get('/complaints');
-                setComplaints(res.data);
-            } catch (error) {
-                console.error("Failed to fetch complaints", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchComplaints();
-    }, []);
+    }, [fetchComplaints]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -92,13 +95,33 @@ export default function ComplaintsTable() {
                                 <TableCell>{complaint.reporter?.email || 'Public Citizen'}</TableCell>
                                 <TableCell>{complaint.assigned_worker?.email || 'Unassigned'}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="outline" size="sm" className="h-8">View Details</Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8"
+                                        onClick={() => {
+                                            setSelectedComplaintId(complaint.id);
+                                            setIsDetailModalOpen(true);
+                                        }}
+                                    >
+                                        View Details
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))
                     )}
                 </TableBody>
             </Table>
+
+            <ComplaintDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => {
+                    setIsDetailModalOpen(false);
+                    setSelectedComplaintId(null);
+                }}
+                complaintId={selectedComplaintId}
+                onUpdate={fetchComplaints}
+            />
         </div>
     );
 }

@@ -1,7 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request } from '@nestjs/common';
 import { ComplaintsService } from './complaints.service';
 import { JwtAuthGuard } from '../auth/guards';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { ComplaintStatus } from './entities/complaint.entity';
+import { UserRole } from '../users/user.entity';
 
 @Controller('complaints')
 export class ComplaintsController {
@@ -23,8 +26,30 @@ export class ComplaintsController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    async findAllComplaints() {
-        return this.complaintsService.findAllComplaints();
+    async findAllComplaints(@Request() req: any) {
+        return this.complaintsService.findAllComplaints(req.user);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('my-assignments/list')
+    async findMyAssignedComplaints(@Request() req: any) {
+        return this.complaintsService.findAssignedComplaints(req.user.userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get(':id')
+    async findOne(@Param('id') id: string) {
+        return this.complaintsService.findOneComplaint(id);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.SUPER_ADMIN, UserRole.CITY_PLANNER)
+    @Patch(':id/assign')
+    async assignWorker(
+        @Param('id') id: string,
+        @Body('workerId') workerId: string,
+    ) {
+        return this.complaintsService.assignWorker(id, workerId);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -37,5 +62,15 @@ export class ComplaintsController {
         // If a worker marked it "InProgress", auto-assign them
         const workerId = status === ComplaintStatus.IN_PROGRESS ? req.user.userId : undefined;
         return this.complaintsService.updateStatus(id, status, workerId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch(':id/resolve')
+    async resolveComplaint(
+        @Param('id') id: string,
+        @Body('resolutionMediaUrl') resolutionMediaUrl: string,
+        @Request() req: any
+    ) {
+        return this.complaintsService.resolveComplaint(id, resolutionMediaUrl, req.user.userId);
     }
 }

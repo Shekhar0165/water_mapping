@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Droplets, Map as MapIcon, ShieldAlert, Database, Settings, LogOut, Wifi, WifiOff, Users } from 'lucide-react';
 import NetworkMap from '../components/NetworkMap';
 import ComplaintsTable from '../components/ComplaintsTable';
+import WorkerComplaintsPanel from '../components/WorkerComplaintsPanel';
 import AssetsTable from '../components/AssetsTable';
 import UserManagement from '../components/UserManagement';
+import AdminComplaintModal from '../components/AdminComplaintModal';
 import { useSocket } from '../hooks/useSocket';
 import { toast } from 'sonner';
 
@@ -16,6 +18,7 @@ export default function Dashboard() {
     const { user, logout } = useAuthStore();
     const navigate = useNavigate();
     const [activeView, setActiveView] = useState<ActiveView>('MAP');
+    const [isComplaintModalOpen, setIsComplaintModalOpen] = useState(false);
 
     const handleSocketMessage = useCallback((event: string, data: any) => {
         if (event === 'complaintNew') {
@@ -74,7 +77,7 @@ export default function Dashboard() {
                         <Database className="w-5 h-5 mr-3" />
                         Assets Database
                     </button>
-                    {user?.role === 'admin' && (
+                    {(user?.role === 'super_admin' || user?.role === 'city_planner') && (
                         <button
                             onClick={() => setActiveView('USERS')}
                             className={`flex items-center w-full px-4 py-3 rounded-md transition-colors ${activeView === 'USERS' ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 hover:text-white'}`}
@@ -113,12 +116,22 @@ export default function Dashboard() {
                 <header className="h-16 flex items-center justify-between px-8 bg-white dark:bg-slate-900 border-b">
                     <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
                         {activeView === 'MAP' && 'Interactive Map Overview'}
-                        {activeView === 'COMPLAINTS' && 'Complaints Management Hub'}
+                        {activeView === 'COMPLAINTS' && (user?.role === 'worker' ? 'My Assigned Complaints' : 'Complaints Management Hub')}
                         {activeView === 'ASSETS' && 'Network Inventory Database'}
                         {activeView === 'USERS' && 'User Management'}
                         {activeView === 'SETTINGS' && 'System Settings'}
                     </h1>
-                    {/* Mobile Header elements here */}
+                    <div className="flex items-center gap-4">
+                        {(user?.role === 'super_admin' || user?.role === 'city_planner') && (
+                            <Button
+                                onClick={() => setIsComplaintModalOpen(true)}
+                                className="bg-danger hover:bg-danger/90 text-white shadow-sm"
+                            >
+                                <ShieldAlert className="w-4 h-4 mr-2" />
+                                Report Issue
+                            </Button>
+                        )}
+                    </div>
                 </header>
 
                 <div className="flex-1 p-8 overflow-auto bg-slate-100 dark:bg-slate-950/50">
@@ -129,7 +142,11 @@ export default function Dashboard() {
                             </div>
                         )}
                         {activeView === 'COMPLAINTS' && (
-                            <ComplaintsTable />
+                            user?.role === 'worker' ? (
+                                <WorkerComplaintsPanel />
+                            ) : (
+                                <ComplaintsTable />
+                            )
                         )}
                         {activeView === 'ASSETS' && (
                             <AssetsTable />
@@ -147,6 +164,15 @@ export default function Dashboard() {
                     </div>
                 </div>
             </main>
+
+            <AdminComplaintModal
+                isOpen={isComplaintModalOpen}
+                onClose={() => setIsComplaintModalOpen(false)}
+                onSuccess={() => {
+                    // Could trigger a refetch here if we were showing complaints, 
+                    // but the socket might handle it for us automatically!
+                }}
+            />
         </div>
     );
 }

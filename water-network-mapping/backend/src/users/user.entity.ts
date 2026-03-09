@@ -1,9 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum UserRole {
-  ADMIN = 'admin',
-  PLANNER = 'planner',
+  SUPER_ADMIN = 'super_admin',
+  CITY_PLANNER = 'city_planner',
   WORKER = 'worker',
+  VIEWER = 'viewer',
 }
 
 @Entity('users')
@@ -26,6 +27,9 @@ export class User {
     default: UserRole.WORKER,
   })
   role: UserRole;
+
+  @Column({ type: 'varchar', nullable: true })
+  cityId: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   hashedRefreshToken: string | null;

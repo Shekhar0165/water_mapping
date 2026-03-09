@@ -13,7 +13,8 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
         });
     }
 
-    async validate(payload: any) {
-        return { userId: payload.sub, email: payload.email, role: payload.role };
+    async validate(req: any, payload: any) {
+        const refreshToken = req.get('Authorization')?.replace('Bearer', '').trim();
+        return { ...payload, refreshToken, userId: payload.sub, cityId: payload.cityId };
     }
 }

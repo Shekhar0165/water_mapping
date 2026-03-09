@@ -28,7 +28,7 @@ async function bootstrap() {
         name: 'Super Admin',
         email: adminEmail,
         password_hash: hashedPassword,
-        role: UserRole.ADMIN,
+        role: UserRole.SUPER_ADMIN,
       });
       console.log('Super Admin account created successfully.');
     }

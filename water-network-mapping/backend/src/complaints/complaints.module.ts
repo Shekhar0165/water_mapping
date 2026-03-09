@@ -5,9 +5,13 @@ import { ComplaintsController } from './complaints.controller';
 import { Complaint } from './entities/complaint.entity';
 import { User } from '../users/user.entity';
 import { NetworkPipe } from '../maps/entities/pipe.entity';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Complaint, User, NetworkPipe])],
+  imports: [
+    TypeOrmModule.forFeature([Complaint, User, NetworkPipe]),
+    MailModule,
+  ],
   providers: [ComplaintsService],
   controllers: [ComplaintsController],
   exports: [ComplaintsService],

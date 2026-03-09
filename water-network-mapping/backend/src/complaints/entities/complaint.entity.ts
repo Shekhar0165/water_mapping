@@ -37,6 +37,9 @@ export class Complaint {
     })
     status: ComplaintStatus;
 
+    @Column({ type: 'varchar', nullable: true })
+    cityId: string | null;
+
     @Column({
         type: 'geometry',
         spatialFeatureType: 'Point',
@@ -51,6 +54,15 @@ export class Complaint {
     @ManyToOne(() => User, { nullable: true })
     @JoinColumn({ name: 'assigned_worker_id' })
     assigned_worker: User;
+
+    @Column({ type: 'varchar', nullable: true })
+    reporter_email: string | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    assigned_at: Date | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    resolved_at: Date | null;
 
     @Column({ type: 'text', nullable: true })
     description: string;
